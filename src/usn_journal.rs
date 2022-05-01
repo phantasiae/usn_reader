@@ -89,10 +89,12 @@ impl<'a> UsnJournal<'a> {
 
     pub fn read<const N: usize>(&self, start_usn: i64, usn_journal_id: u64) -> Result<RawRecords<N>> {
         let (records, len): (Box<[_;N]>, _) = unsafe { self.raw_read(start_usn, usn_journal_id)? };
-        
+        let next = unsafe { (records.as_ptr() as *const i64).read() };
+
         Ok(RawRecords {
             raw_ptr: records,
             len,
+            next,
         })
     }
 
@@ -120,9 +122,9 @@ mod tests {
     #[ignore]
     fn it_should_read_usn() {
         let vh = VolumeHandle::new('c');
-        let mut r = UsnJournal::new(&vh);
+        let r = UsnJournal::new(&vh);
         let q = r.query_data_v2().unwrap();
-        let records: (Box<[u8; 300]>, _) = unsafe { r.raw_read(0, q.UsnJournalID).unwrap() };
+        let _records: (Box<[u8; 300]>, _) = unsafe { r.raw_read(0, q.UsnJournalID).unwrap() };
     }
 
     #[test]
