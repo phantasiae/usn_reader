@@ -1,34 +1,10 @@
-use std::path::Path;
 use anyhow::{anyhow, Result};
-use windows::core::IntoParam;
 use windows::Win32::Foundation::HANDLE;
 use windows::Win32::Storage::FileSystem::{CreateFileW, FILE_ATTRIBUTE_READONLY, FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_SHARE_READ, FILE_SHARE_WRITE, OPEN_EXISTING};
 
 pub struct VolumeHandle {
     pub volume: String,
     pub handle: HANDLE,
-}
-
-impl From<&Path> for VolumeHandle {
-    fn from(p: &Path) -> Self {
-        let volume = format!(r#"\\.\{}:"#, p.);
-
-        let handle = unsafe {
-            CreateFileW(
-                volume.clone(),
-                FILE_GENERIC_READ | FILE_GENERIC_WRITE,
-                FILE_SHARE_READ | FILE_SHARE_WRITE,
-                std::ptr::null(),
-                OPEN_EXISTING,
-                FILE_ATTRIBUTE_READONLY,
-                HANDLE::default(),
-            )
-        };
-        VolumeHandle {
-            volume,
-            handle,
-        }
-    }
 }
 
 impl VolumeHandle {

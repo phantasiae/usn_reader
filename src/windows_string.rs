@@ -1,4 +1,4 @@
-use widestring::{U16CStr, U16String};
+use widestring::U16CStr;
 use windows::core::{PCWSTR, PWSTR};
 
 pub trait ToString {
@@ -21,7 +21,7 @@ impl ToString for PWSTR {
 
 #[cfg(test)]
 mod tests {
-    use windows::core::{IntoParam, Param, PCWSTR, PWSTR};
+    use windows::core::PCWSTR;
     use crate::windows_string::ToString;
 
     #[test]

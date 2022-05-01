@@ -1,7 +1,7 @@
 use anyhow::Result;
 use std::mem::size_of;
 use std::path::PathBuf;
-use widestring::{U16CStr, U16Str};
+use widestring::U16Str;
 pub use windows::Win32::System::Ioctl::{USN_RECORD_UNION, USN_RECORD_V2, USN_RECORD_V3};
 use windows::Win32::System::Ioctl::USN_RECORD_V4;
 
@@ -101,8 +101,7 @@ impl<const N: usize> RawRecords<N> {
 #[cfg(test)]
 mod tests {
     use windows::Win32::System::Ioctl::USN_RECORD_UNION;
-    // use windows::Win32::System::Ioctl::USN_RECORD_UNION;
-    use crate::usn_journal_record::{RawRecords, Record, WithRecordLength};
+    use crate::usn_journal_record::RawRecords;
 
     #[test]
     fn it_should_be_parsed_with_raw_ujr() {

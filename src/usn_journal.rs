@@ -1,11 +1,7 @@
 use anyhow::{anyhow, Result};
-use std::mem::{size_of, size_of_val, transmute, transmute_copy};
-use windows::Win32::Foundation::{GetLastError, HANDLE};
-use windows::Win32::Storage::FileSystem::{
-    CreateFileW, FILE_ATTRIBUTE_READONLY, FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_SHARE_READ,
-    FILE_SHARE_WRITE, OPEN_EXISTING,
-};
-use windows::Win32::System::Ioctl::{FSCTL_QUERY_USN_JOURNAL, FSCTL_READ_USN_JOURNAL, READ_USN_JOURNAL_DATA_V0, USN_JOURNAL_DATA_V0, USN_JOURNAL_DATA_V1, USN_JOURNAL_DATA_V2, USN_RECORD_UNION};
+use std::mem::{size_of_val, transmute};
+use windows::Win32::Foundation::{GetLastError};
+use windows::Win32::System::Ioctl::{FSCTL_QUERY_USN_JOURNAL, FSCTL_READ_USN_JOURNAL, READ_USN_JOURNAL_DATA_V0, USN_JOURNAL_DATA_V0, USN_JOURNAL_DATA_V1, USN_JOURNAL_DATA_V2};
 use windows::Win32::System::IO::DeviceIoControl;
 use crate::usn_journal_record::RawRecords;
 use crate::volume_handle::VolumeHandle;
