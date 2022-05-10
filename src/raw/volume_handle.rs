@@ -41,7 +41,7 @@ impl VolumeHandle {
 
 #[cfg(test)]
 mod tests {
-    use crate::volume_handle::VolumeHandle;
+    use crate::raw::volume_handle::VolumeHandle;
 
     #[test]
     fn it_should_get_a_error() {

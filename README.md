@@ -5,6 +5,8 @@
 reading windows Change Journal (USN Journal).
 
 ## todo list
-- [ ] read*ing*
-- [ ] create
-- [ ] delete
+- [ ] create:    *FSCTL_CREATE_USN_JOURNAL*
+- [ ] query:     *FSCTL_QUERY_USN_JOURNAL*
+- [ ] enum:      *FSCTL_ENUM_USN_DATA*
+- [ ] read*ing*: *FSCTL_READ_USN_JOURNAL*
+- [ ] delete:    *FSCTL_DELETE_USN_JOURNAL*

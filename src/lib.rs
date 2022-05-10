@@ -1,8 +1,8 @@
-mod usn_journal;
-mod windows_string;
-mod volume_handle;
-mod usn_journal_record;
-mod usn_journal_record_iter;
+pub mod raw;
+pub mod reader;
+pub mod usn_journal_data;
+pub mod usn_journal_record;
+pub mod usn_journal_record_iter;
 
 #[cfg(test)]
 mod tests {
