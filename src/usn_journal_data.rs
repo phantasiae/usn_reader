@@ -1,8 +1,6 @@
 use crate::raw::usn_journal_wrapper::UsnJournalWrapper;
 use anyhow::Result;
-use windows::Win32::System::Ioctl::{
-    USN_JOURNAL_DATA_V0, USN_JOURNAL_DATA_V1, USN_JOURNAL_DATA_V2,
-};
+use windows::Win32::System::Ioctl::USN_JOURNAL_DATA_V2;
 
 pub struct UsnJournalData<'a, U: UsnJournalWrapper, D: Default> {
     usn_journal: &'a U,
@@ -42,6 +40,14 @@ mod tests {
     use windows::Win32::System::Ioctl::USN_JOURNAL_DATA_V2;
 
     struct TestUsnJournal {}
+    trait Mock {
+        fn get_usn_journal_id(&self) -> u64;
+    }
+    impl Mock for USN_JOURNAL_DATA_V2 {
+        fn get_usn_journal_id(&self) -> u64 {
+            self.UsnJournalID
+        }
+    }
 
     impl UsnJournalWrapper for TestUsnJournal {
         unsafe fn raw_create(&self) {

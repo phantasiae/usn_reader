@@ -3,6 +3,7 @@ pub mod reader;
 pub mod usn_journal_data;
 pub mod usn_journal_record;
 pub mod usn_journal_record_iter;
+pub mod usn_record;
 
 #[cfg(test)]
 mod tests {

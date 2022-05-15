@@ -1,6 +1,8 @@
 use crate::raw::parser::Parser;
 use crate::raw::usn_journal_wrapper::{RawRecords, UsnJournalWrapper};
+use crate::usn_record::Record;
 use anyhow::{anyhow, Result};
+use std::os::raw::c_longlong;
 pub use windows::Win32::System::Ioctl::{USN_RECORD_UNION, USN_RECORD_V2, USN_RECORD_V3};
 
 pub struct UsnRecordFactory<'a, U>
@@ -26,16 +28,24 @@ impl<'a, U: UsnJournalWrapper> UsnRecordFactory<'a, U> {
         self
     }
 
+    pub fn set_start_usn(&mut self, usn: i64) -> &Self {
+        self.start_usn = usn;
+        self
+    }
+
     pub fn read<const N: usize>(&self) -> Result<UsnJournalRecord<U, N>> {
+        // TODO: should match windows version.
         let usn_journal_id = self
             .usn_journal_id
             .ok_or(anyhow!("usn journal id not found."))?;
 
         let raw_records = unsafe { self.usn_journal.raw_read(self.start_usn, usn_journal_id)? };
+        // TODO: reading next block here or raw layer?
+        let next_usn = unsafe { (raw_records.raw_ptr.as_ptr() as *const c_longlong).read() };
         Ok(UsnJournalRecord {
             usn_journal: &self.usn_journal,
             raw: raw_records,
-            next: None,
+            next_usn: Some(next_usn),
         })
     }
 }
@@ -43,12 +53,7 @@ impl<'a, U: UsnJournalWrapper> UsnRecordFactory<'a, U> {
 pub struct UsnJournalRecord<'a, U: UsnJournalWrapper, const N: usize> {
     pub usn_journal: &'a U,
     pub raw: RawRecords<N>,
-    pub next: Option<i64>,
-}
-
-#[derive(Clone, Debug)]
-pub struct Record {
-    pub usn: i64,
+    pub next_usn: Option<i64>,
 }
 
 impl<'a, U: UsnJournalWrapper, const N: usize> UsnJournalRecord<'a, U, N> {

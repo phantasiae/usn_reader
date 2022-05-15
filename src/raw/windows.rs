@@ -4,7 +4,7 @@ use windows::Win32::Foundation::{GetLastError};
 use windows::Win32::System::Ioctl::{FSCTL_QUERY_USN_JOURNAL, FSCTL_READ_USN_JOURNAL, READ_USN_JOURNAL_DATA_V0};
 use windows::Win32::System::IO::DeviceIoControl;
 use crate::raw::usn_journal_wrapper::{RawRecords, UsnJournalWrapper};
-use crate::volume_handle::VolumeHandle;
+use crate::raw::volume_handle::VolumeHandle;
 
 pub struct WindowsUsnJournal<'a> {
     pub handle: &'a VolumeHandle

@@ -1,62 +1,107 @@
+use crate::raw::usn_journal_wrapper::UsnJournalWrapper;
+use crate::reader::RecordFetcher;
+use crate::usn_record::Record;
 use std::vec::IntoIter;
-use crate::usn_journal::UsnJournal;
-use crate::usn_journal_record::{RawRecords, Record};
 
-pub struct UsnJournalIter<'a> {
-    pub usn_journal: UsnJournal<'a>,
-    pub raw_records: IntoIter<Record>,
-    pub record: Option<Record>,
-    pub start_usn: i64,
+pub struct UsnJournalIter<'a, F: RecordFetcher> {
+    pub fetcher: &'a F,
+    pub records: IntoIter<Record>,
+    pub current: usize,
 }
 
-impl Iterator for UsnJournalIter<'_> {
+impl<'a, F> UsnJournalIter<'a, F>
+where
+    F: RecordFetcher,
+{
+    pub fn new(records: IntoIter<Record>, fetcher: &'a F) -> Self {
+        Self {
+            fetcher,
+            records,
+            current: 0,
+        }
+    }
+}
+
+impl<'a, F> Iterator for UsnJournalIter<'a, F>
+where
+    F: RecordFetcher,
+{
     type Item = Record;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let next = self.raw_records.next();
+        let mut records = self.records.clone();
+
+        let next = records.nth(self.current);
         if next.is_some() {
-            self.record = next.clone();
+            self.current += 1;
             return next;
         }
 
-        let queried = self.usn_journal.query_data_v2().ok()?;
-        let raw_records = self.usn_journal.read::<1_048_576>(self.start_usn, queried.UsnJournalID).ok()?;
-        let records = raw_records.parse().ok()?;
+        self.current = 0;
+        let next_block = self.fetcher.do_fetch().ok()?;
+        let current_record = next_block.into_iter();
 
-        self.raw_records = records.into_iter();
-        self.start_usn = raw_records.next;
-
-        self.record.clone()
+        self.records = current_record;
+        self.next()
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::usn_journal::UsnJournal;
-    use crate::usn_journal_record::Record;
+    use crate::reader::RecordFetcher;
     use crate::usn_journal_record_iter::UsnJournalIter;
-    use crate::volume_handle::VolumeHandle;
+    use crate::usn_record::{Record, Records};
+    use anyhow::Result;
+
+    struct MockFetcher {}
+
+    impl RecordFetcher for MockFetcher {
+        fn do_fetch(&self) -> Result<Box<Vec<Record>>> {
+            Ok(Box::from(vec![
+                Record {
+                    usn: 3,
+                    ..Default::default()
+                },
+                Record {
+                    usn: 4,
+                    ..Default::default()
+                },
+            ]))
+        }
+    }
 
     #[test]
-    #[ignore]
+    fn it_should_be_got_none() {
+        let mut iter = UsnJournalIter::new(vec![].into_iter(), &MockFetcher {});
+
+        let first = iter.next();
+        assert!(first.is_none());
+    }
+
+    #[test]
     fn it_should_be_got_next() {
-        let vol = VolumeHandle::new('c');
-        let usn_journal = UsnJournal::new(&vol);
-        let q = usn_journal.query_data_v2().unwrap();
-        let raw_records = usn_journal.read::<300>(0, q.UsnJournalID).unwrap();
-        let records = raw_records.parse().unwrap();
-        let mut iter = UsnJournalIter {
-            usn_journal,
-            raw_records: records.into_iter(),
-            record: None,
-            start_usn: 0,
+        let records = Records {
+            content: Box::new(vec![
+                Record {
+                    usn: 1,
+                    ..Default::default()
+                },
+                Record {
+                    usn: 2,
+                    ..Default::default()
+                },
+            ]),
+            fetcher: &MockFetcher {},
         };
+        let mut iter = records.into_iter();
+        let first = iter.next().unwrap();
+        let second = iter.next().unwrap();
+        let third = iter.next().unwrap();
+        let forth = iter.next().unwrap();
 
-        let r1: Record = iter.next().unwrap().into();
-        let r2 = iter.next().unwrap();
-        let r3 = iter.next().unwrap();
-
-        assert_ne!(r1.usn, r2.usn);
-        assert_ne!(r2.usn, r3.usn);
+        assert_eq!(first.usn, 1);
+        assert_eq!(second.usn, 2);
+        assert_eq!(third.usn, 3);
+        assert_eq!(forth.usn, 4);
     }
 }
