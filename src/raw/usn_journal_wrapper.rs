@@ -1,3 +1,4 @@
+use crate::raw::windows::RawUsnJournalData;
 use anyhow::Result;
 
 pub struct RawRecords<const N: usize> {
@@ -7,7 +8,7 @@ pub struct RawRecords<const N: usize> {
 
 pub trait UsnJournalWrapper {
     unsafe fn raw_create(&self);
-    unsafe fn raw_query<D: Default>(&self) -> Result<D>;
+    unsafe fn raw_query<D: RawUsnJournalData + Default>(&self) -> Result<D>;
     unsafe fn raw_read<const N: usize>(
         &self,
         start_usn: i64,

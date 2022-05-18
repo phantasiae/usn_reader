@@ -1,6 +1,6 @@
 use crate::raw::usn_journal_wrapper::RawRecords;
 use std::mem::size_of;
-use windows::Win32::System::Ioctl::{USN_JOURNAL_DATA_V2, USN_RECORD_V2};
+use windows::Win32::System::Ioctl::USN_RECORD_V2;
 
 pub trait Parser {
     fn parse<R: RawUsnRecord>(self) -> Box<Vec<R>>;

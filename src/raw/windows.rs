@@ -1,20 +1,22 @@
-use anyhow::{anyhow, Result};
-use std::mem::{size_of_val, transmute};
-use windows::Win32::Foundation::{GetLastError};
-use windows::Win32::System::Ioctl::{FSCTL_QUERY_USN_JOURNAL, FSCTL_READ_USN_JOURNAL, READ_USN_JOURNAL_DATA_V0};
-use windows::Win32::System::IO::DeviceIoControl;
 use crate::raw::usn_journal_wrapper::{RawRecords, UsnJournalWrapper};
 use crate::raw::volume_handle::VolumeHandle;
+use anyhow::{anyhow, Result};
+use std::any::Any;
+use std::mem::{size_of_val, transmute};
+use windows::Win32::Foundation::GetLastError;
+use windows::Win32::System::Ioctl::{
+    FSCTL_QUERY_USN_JOURNAL, FSCTL_READ_USN_JOURNAL, READ_USN_JOURNAL_DATA_V0, USN_JOURNAL_DATA_V0,
+    USN_JOURNAL_DATA_V1, USN_JOURNAL_DATA_V2,
+};
+use windows::Win32::System::IO::DeviceIoControl;
 
 pub struct WindowsUsnJournal<'a> {
-    pub handle: &'a VolumeHandle
+    pub handle: &'a VolumeHandle,
 }
 
 impl<'a> WindowsUsnJournal<'a> {
     pub fn new(volume: &'a VolumeHandle) -> Self {
-        Self {
-            handle: volume,
-        }
+        Self { handle: volume }
     }
 }
 
@@ -23,7 +25,7 @@ impl<'a> UsnJournalWrapper for WindowsUsnJournal<'a> {
         todo!()
     }
 
-    unsafe fn raw_query<D: Default>(&self) -> Result<D> {
+    unsafe fn raw_query<D: RawUsnJournalData + Default>(&self) -> Result<D> {
         let mut result = D::default();
         let mut ret_bytes = 0;
 
@@ -37,7 +39,8 @@ impl<'a> UsnJournalWrapper for WindowsUsnJournal<'a> {
             &mut ret_bytes,
             std::ptr::null_mut(),
         )
-            .as_bool() {
+        .as_bool()
+        {
             return Err(anyhow!(GetLastError().0));
         }
 
@@ -70,10 +73,16 @@ impl<'a> UsnJournalWrapper for WindowsUsnJournal<'a> {
             &mut ret_bytes,
             std::ptr::null_mut(),
         )
-            .as_bool()
+        .as_bool()
         {
-            true => Ok(RawRecords { raw_ptr: output, len: ret_bytes }),
-            false => Ok(RawRecords { raw_ptr: output, len: 0 }),
+            true => Ok(RawRecords {
+                raw_ptr: output,
+                len: ret_bytes,
+            }),
+            false => Ok(RawRecords {
+                raw_ptr: output,
+                len: 0,
+            }),
         }
     }
 
@@ -85,3 +94,9 @@ impl<'a> UsnJournalWrapper for WindowsUsnJournal<'a> {
         todo!()
     }
 }
+
+pub trait RawUsnJournalData {}
+
+impl RawUsnJournalData for USN_JOURNAL_DATA_V0 {}
+impl RawUsnJournalData for USN_JOURNAL_DATA_V1 {}
+impl RawUsnJournalData for USN_JOURNAL_DATA_V2 {}

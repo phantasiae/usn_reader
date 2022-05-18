@@ -1,4 +1,3 @@
-use crate::raw::usn_journal_wrapper::UsnJournalWrapper;
 use crate::reader::RecordFetcher;
 use crate::usn_record::Record;
 use std::vec::IntoIter;
@@ -29,20 +28,17 @@ where
     type Item = Record;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let mut records = self.records.clone();
-
-        let next = records.nth(self.current);
-        if next.is_some() {
-            self.current += 1;
-            return next;
-        }
-
-        self.current = 0;
-        let next_block = self.fetcher.do_fetch().ok()?;
-        let current_record = next_block.into_iter();
-
-        self.records = current_record;
-        self.next()
+        self.records.next().or_else(|| {
+            let next_block = self.fetcher.do_fetch().ok()?;
+            match next_block.is_empty() {
+                true => None,
+                false => {
+                    self.records = next_block.into_iter();
+                    self.current = 0;
+                    self.next()
+                }
+            }
+        })
     }
 }
 
@@ -70,9 +66,17 @@ mod tests {
         }
     }
 
+    struct MockFetcher2 {}
+
+    impl RecordFetcher for MockFetcher2 {
+        fn do_fetch(&self) -> Result<Box<Vec<Record>>> {
+            Ok(Box::new(vec![]))
+        }
+    }
+
     #[test]
     fn it_should_be_got_none() {
-        let mut iter = UsnJournalIter::new(vec![].into_iter(), &MockFetcher {});
+        let mut iter = UsnJournalIter::new(vec![].into_iter(), &MockFetcher2 {});
 
         let first = iter.next();
         assert!(first.is_none());

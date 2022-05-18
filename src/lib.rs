@@ -4,6 +4,7 @@ pub mod usn_journal_data;
 pub mod usn_journal_record;
 pub mod usn_journal_record_iter;
 pub mod usn_record;
+mod util;
 
 #[cfg(test)]
 mod tests {

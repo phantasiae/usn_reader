@@ -5,6 +5,10 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+#windows = ["dep:windows"]
+#winapi = []
+
 [dependencies]
 widestring = "0.5.1"
 anyhow = "1"
@@ -13,7 +17,8 @@ anyhow = "1"
 version = "0.3"
 
 [dependencies.windows]
-version = "0.34"
+version = "*"
+#optional = true
 features = [
     "alloc",
     "Data_Xml_Dom",
@@ -21,5 +26,6 @@ features = [
     "Win32_Security",
     "Win32_System_IO",
     "Win32_System_Ioctl",
+    "Win32_System_SystemInformation",
     "Win32_Storage_FileSystem"
 ]

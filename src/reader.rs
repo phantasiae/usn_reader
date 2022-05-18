@@ -37,7 +37,7 @@ where
         let data_factory = UsnJournalDataFactory::new(self.usn_journal);
         let data = data_factory.query()?;
         let mut record_factory = UsnRecordFactory::new(self.usn_journal);
-        record_factory.set_usn_journal_id(data.raw.UsnJournalID);
+        record_factory.set_usn_journal_id(data.data.usn_journal_id);
         let raw_records = record_factory.read::<65535>()?;
         let records = raw_records.parse();
         Ok(records)

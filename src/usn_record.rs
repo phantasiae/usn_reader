@@ -25,7 +25,6 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::raw::usn_journal_wrapper::UsnJournalWrapper;
     use crate::reader::RecordFetcher;
     use crate::usn_record::{Record, Records};
     use anyhow::Result;
