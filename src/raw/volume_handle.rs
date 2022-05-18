@@ -1,34 +1,33 @@
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use windows::Win32::Foundation::HANDLE;
-use windows::Win32::Storage::FileSystem::{CreateFileW, FILE_ATTRIBUTE_READONLY, FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_SHARE_READ, FILE_SHARE_WRITE, OPEN_EXISTING};
+use windows::Win32::Storage::FileSystem::{
+    CreateFileW, FILE_ATTRIBUTE_READONLY, FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_SHARE_READ,
+    FILE_SHARE_WRITE, OPEN_EXISTING,
+};
 
 pub struct VolumeHandle {
     pub volume: String,
-    pub handle: HANDLE,
 }
 
 impl VolumeHandle {
     pub fn new(volume: char) -> Self {
         let volume = format!(r#"\\.\{}:"#, volume);
-        let handle = unsafe {
+
+        Self { volume }
+    }
+
+    pub fn build_handle(&self) -> Result<HANDLE> {
+        unsafe {
             CreateFileW(
-                volume.clone(),
+                self.volume.clone(),
                 FILE_GENERIC_READ | FILE_GENERIC_WRITE,
                 FILE_SHARE_READ | FILE_SHARE_WRITE,
                 std::ptr::null(),
                 OPEN_EXISTING,
                 FILE_ATTRIBUTE_READONLY,
                 HANDLE::default(),
-            )
-        };
-
-        Self { volume, handle }
-    }
-
-    pub fn get_handle(&self) -> Result<HANDLE> {
-        self.handle
-            .ok()
-            .map_err(|e| { anyhow!("get handle {} error: {}.", self.volume, e) })
+            ).map_err(anyhow::Error::from)
+        }
     }
 }
 
@@ -39,13 +38,13 @@ mod tests {
     #[test]
     fn it_should_get_a_error() {
         let h = VolumeHandle::new('2');
-        assert!(h.get_handle().is_err());
+        assert!(h.build_handle().is_err());
     }
 
     #[test]
     #[ignore]
     fn it_should_return_a_handle() {
         let h = VolumeHandle::new('c');
-        assert!(h.get_handle().is_err());
+        assert!(h.build_handle().is_err());
     }
 }

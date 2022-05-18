@@ -29,7 +29,7 @@ impl<'a> UsnJournalWrapper for WindowsUsnJournal<'a> {
         let mut ret_bytes = 0;
 
         if !DeviceIoControl(
-            self.handle.get_handle()?,
+            self.handle.build_handle()?,
             FSCTL_QUERY_USN_JOURNAL,
             std::ptr::null(),
             0,
@@ -63,7 +63,7 @@ impl<'a> UsnJournalWrapper for WindowsUsnJournal<'a> {
         };
 
         match DeviceIoControl(
-            self.handle.get_handle()?,
+            self.handle.build_handle()?,
             FSCTL_READ_USN_JOURNAL,
             transmute(&input),
             size_of_val(&input) as _,
