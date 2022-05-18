@@ -30,13 +30,6 @@ impl VolumeHandle {
             .ok()
             .map_err(|e| { anyhow!("get handle {} error: {}.", self.volume, e) })
     }
-
-    #[cfg(why)]
-    pub unsafe fn get_std_handle(&self) -> Result<std::os::windows::raw::HANDLE> {
-        self.handle.ok()
-            .map(|h| { h.0 as _ })
-            .map_err(|e| { anyhow!("get {} handle error: {}.", self.volume, e) })
-    }
 }
 
 #[cfg(test)]

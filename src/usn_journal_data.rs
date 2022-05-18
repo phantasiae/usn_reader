@@ -133,7 +133,7 @@ where
 mod tests {
     use crate::raw::usn_journal_wrapper::{RawRecords, UsnJournalWrapper};
     use crate::raw::windows::RawUsnJournalData;
-    use crate::usn_journal_data::{Data, UsnJournalData, UsnJournalDataFactory};
+    use crate::usn_journal_data::UsnJournalDataFactory;
     use anyhow::Result;
     use windows::Win32::System::Ioctl::USN_JOURNAL_DATA_V2;
 

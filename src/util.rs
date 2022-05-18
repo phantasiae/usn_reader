@@ -1,5 +1,3 @@
-use crate::util::WindowsVersion::Win7;
-use anyhow::Result;
 use windows::Win32::System::SystemInformation::{GetVersionExW, OSVERSIONINFOW};
 
 pub enum WindowsVersion {
@@ -24,15 +22,5 @@ pub fn get_os_version() -> WindowsVersion {
         (10, _) => WindowsVersion::GreaterWin7,
         (11, _) => WindowsVersion::GreaterWin7,
         _ => WindowsVersion::Other,
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::util::get_os_version;
-
-    #[test]
-    fn it_should_get_os_version() {
-        let version = get_os_version();
     }
 }

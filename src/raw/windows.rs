@@ -1,7 +1,6 @@
 use crate::raw::usn_journal_wrapper::{RawRecords, UsnJournalWrapper};
 use crate::raw::volume_handle::VolumeHandle;
 use anyhow::{anyhow, Result};
-use std::any::Any;
 use std::mem::{size_of_val, transmute};
 use windows::Win32::Foundation::GetLastError;
 use windows::Win32::System::Ioctl::{
