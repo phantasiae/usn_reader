@@ -11,23 +11,22 @@ pub struct VolumeHandle {
 
 impl VolumeHandle {
     pub fn new(volume: char) -> Self {
-        let volume = format!(r#"\\.\{}:"#, volume);
-
-        Self { volume }
+        Self {
+            volume: format!(r#"\\.\{}:"#, volume),
+        }
     }
 
-    pub fn build_handle(&self) -> Result<HANDLE> {
-        unsafe {
-            CreateFileW(
-                self.volume.clone(),
-                FILE_GENERIC_READ | FILE_GENERIC_WRITE,
-                FILE_SHARE_READ | FILE_SHARE_WRITE,
-                std::ptr::null(),
-                OPEN_EXISTING,
-                FILE_ATTRIBUTE_READONLY,
-                HANDLE::default(),
-            ).map_err(anyhow::Error::from)
-        }
+    pub unsafe fn create(&self) -> Result<HANDLE> {
+        CreateFileW(
+            self.volume.to_string(),
+            FILE_GENERIC_READ | FILE_GENERIC_WRITE,
+            FILE_SHARE_READ | FILE_SHARE_WRITE,
+            std::ptr::null(),
+            OPEN_EXISTING,
+            FILE_ATTRIBUTE_READONLY,
+            HANDLE::default(),
+        )
+        .map_err(|e| anyhow!("get handle {} error: {}.", self.volume, e))
     }
 }
 
@@ -38,13 +37,13 @@ mod tests {
     #[test]
     fn it_should_get_a_error() {
         let h = VolumeHandle::new('2');
-        assert!(h.build_handle().is_err());
+        assert!(unsafe { h.create().is_err() });
     }
 
     #[test]
     #[ignore]
     fn it_should_return_a_handle() {
         let h = VolumeHandle::new('c');
-        assert!(h.build_handle().is_err());
+        assert!(unsafe { h.create().is_err() });
     }
 }

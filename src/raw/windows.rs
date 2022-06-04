@@ -29,7 +29,7 @@ impl<'a> UsnJournalWrapper for WindowsUsnJournal<'a> {
         let mut ret_bytes = 0;
 
         if !DeviceIoControl(
-            self.handle.build_handle()?,
+            self.handle.create()?,
             FSCTL_QUERY_USN_JOURNAL,
             std::ptr::null(),
             0,
@@ -63,7 +63,7 @@ impl<'a> UsnJournalWrapper for WindowsUsnJournal<'a> {
         };
 
         match DeviceIoControl(
-            self.handle.build_handle()?,
+            self.handle.create()?,
             FSCTL_READ_USN_JOURNAL,
             transmute(&input),
             size_of_val(&input) as _,
@@ -85,7 +85,7 @@ impl<'a> UsnJournalWrapper for WindowsUsnJournal<'a> {
         }
     }
 
-    unsafe fn raw_enum<const N: usize>(&self) -> Result<RawRecords<N>, anyhow::Error> {
+    unsafe fn raw_enum<const N: usize>(&self) -> Result<RawRecords<N>> {
         todo!()
     }
 
