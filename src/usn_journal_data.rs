@@ -147,10 +147,7 @@ mod tests {
     use crate::raw::usn_journal_wrapper::{RawRecords, UsnJournalWrapper};
     use crate::raw::windows::RawUsnJournalData;
     use crate::usn_journal_data::UsnJournalDataFactory;
-<<<<<<< HEAD
-=======
     use crate::util::windows_version::{SettingWindowsVersion, WindowsVersion};
->>>>>>> fd80b72 (match usn data version by os version is added and updating windows api version.)
     use anyhow::Result;
     use windows::Win32::System::Ioctl::USN_JOURNAL_DATA_V2;
 
