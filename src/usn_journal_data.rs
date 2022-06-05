@@ -1,5 +1,5 @@
 use crate::raw::usn_journal_wrapper::UsnJournalWrapper;
-use crate::util::windows_version::{SettingWindowsVersion, WindowsVersion};
+use crate::util::windows_version::{MatchVersion, WindowsVersion};
 use anyhow::Result;
 use windows::Win32::System::Ioctl::{
     USN_JOURNAL_DATA_V0, USN_JOURNAL_DATA_V1, USN_JOURNAL_DATA_V2,
@@ -99,11 +99,11 @@ where
     version: &'a WindowsVersion,
 }
 
-impl<'a, U> SettingWindowsVersion<'a> for UsnJournalDataFactory<'a, U>
+impl<'a, U> MatchVersion<'a> for UsnJournalDataFactory<'a, U>
 where
     U: UsnJournalWrapper,
 {
-    fn set_windows_version(&mut self, version: &'a WindowsVersion) {
+    fn by_win_version(&mut self, version: &'a WindowsVersion) {
         self.version = &version;
     }
 }
@@ -147,7 +147,7 @@ mod tests {
     use crate::raw::usn_journal_wrapper::{RawRecords, UsnJournalWrapper};
     use crate::raw::windows::RawUsnJournalData;
     use crate::usn_journal_data::UsnJournalDataFactory;
-    use crate::util::windows_version::{SettingWindowsVersion, WindowsVersion};
+    use crate::util::windows_version::{MatchVersion, WindowsVersion};
     use anyhow::Result;
     use windows::Win32::System::Ioctl::USN_JOURNAL_DATA_V2;
 
@@ -191,7 +191,7 @@ mod tests {
     fn it_has_available_to_specify_os_query() {
         let mut factory = UsnJournalDataFactory::new(&TestUsnJournal {});
         let version = WindowsVersion::get();
-        factory.set_windows_version(&version);
+        factory.by_win_version(&version);
         let data = factory.query().unwrap();
 
         assert_eq!(data.data.usn_journal_id, 0);

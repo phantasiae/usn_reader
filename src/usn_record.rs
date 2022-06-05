@@ -4,6 +4,13 @@ use crate::usn_journal_record_iter::UsnJournalIter;
 #[derive(Clone, Debug, Default)]
 pub struct Record {
     pub usn: i64,
+    pub timestamp: i64,
+}
+
+impl Record {
+    pub fn get_unix_timestamp(&self) -> i64 {
+        (self.timestamp / 10_000_000) - 11644473600
+    }
 }
 
 pub struct Records<'a, F: RecordFetcher> {
@@ -66,5 +73,16 @@ mod tests {
         let r1 = iter.next().unwrap();
 
         assert_eq!(r1.usn, 1);
+    }
+
+    #[test]
+    fn it_should_convert_timestamp() {
+        let record = Record {
+            timestamp: 132989000930000000,
+            ..Default::default()
+        };
+
+        let unix_timestapm = record.get_unix_timestamp();
+        assert_eq!(unix_timestapm, 1654426493);
     }
 }

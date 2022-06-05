@@ -1,7 +1,7 @@
 use windows::Win32::System::SystemInformation::{GetVersionExW, OSVERSIONINFOW};
 
-pub trait SettingWindowsVersion<'a> {
-    fn set_windows_version(&mut self, version: &'a WindowsVersion) {}
+pub trait MatchVersion<'a> {
+    fn by_win_version(&mut self, version: &'a WindowsVersion) {}
 }
 
 pub enum WindowsVersion {

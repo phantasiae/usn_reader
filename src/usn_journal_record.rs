@@ -75,7 +75,15 @@ impl<'a, U: UsnJournalWrapper, const N: usize> UsnJournalRecord<'a, U, N> {
     pub fn parse(self) -> Box<Vec<Record>> {
         // TODO: how represent in here each windows version.
         let raw_records = self.raw.parse::<USN_RECORD_V2>();
-        Box::new(raw_records.iter().map(|r| Record { usn: r.Usn }).collect())
+        Box::new(
+            raw_records
+                .iter()
+                .map(|r| Record {
+                    usn: r.Usn,
+                    timestamp: r.TimeStamp,
+                })
+                .collect(),
+        )
     }
 }
 
